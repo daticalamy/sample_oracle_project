@@ -2,39 +2,32 @@
 
 # ways to run this script:
 # ./runme.sh <lbCommand> <OPTIONAL:targetSchema>
-# e.g. 
+# examples:
 #   ./runme.sh update
 #   ./runme.sh rollbackOneUpdate schema2
-
 
 export lbCommand="$1"
 export targetSchema="$2"
 
+# Add your flow file locations
 export LIQUIBASE_SEARCH_PATH=.,flowfiles,policychecks,s3://asmith-s3-extension-demo/oracleSnapshots/
 
-# Example Liquibase environment variables. 
-# When these environment variables are set, Liquibase will not require a liquibase.properties file.
-# Complete list of Liquibase envirnoment variables here: https://docs.liquibase.com/reference-guide/parameters/what-are-parameters
-# export LIQUIBASE_COMMAND_URL=""
-# export LIQUIBASE_COMMAND_USERNAME=""
-# export LIQUIBASE_COMMAND_PASSWORD=""
+echo "lbCommand=$lbCommand"
+echo "targetSchema=$targetSchema"
 
-echo lbCommand=$lbCommand
-echo targetSchema=$targetSchema
+# Define schema list
+schemas=("schema1" "schema2" "schema3")
 
-for i in schema1 schema2 schema3
-do
-    if [ $lbCommand == "rollbackOneUpdate" ] 
-    then
-        if [ $targetSchema == "$i" ] 
-        then 
-            echo "i=$i and lbCommand=$lbCommand"
-            export schema=$i
-            liquibase flow
-        fi
-    else
-        echo "i=$i and lbCommand=$lbCommand"
-        export schema=$i
-        liquibase flow
+for schema in "${schemas[@]}"; do
+
+    # If targetSchema is set AND does not match current schema → skip it
+    if [[ -n "$targetSchema" && "$schema" != "$targetSchema" ]]; then
+        continue
     fi
+
+    # Run for this schema
+    echo "Running $lbCommand for schema=$schema"
+    export schema
+    liquibase flow
+
 done
