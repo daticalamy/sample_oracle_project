@@ -1,0 +1,7 @@
+logs/
+reports/
+snapshots/
+liquibase.properties
+.liquibase
+data/
+generatechangelogs/
